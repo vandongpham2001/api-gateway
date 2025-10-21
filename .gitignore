@@ -36,5 +36,7 @@ out/
 ### VS Code ###
 .vscode/
 
+logs
+
 **/src/**/application.yaml
 **/src/**/application-prod.yaml

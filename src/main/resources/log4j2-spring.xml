@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="30">
+    <Properties>
+        <Property name="LOG_EXCEPTION_CONVERSION_WORD">%xwEx</Property>
+        <Property name="LOG_LEVEL_PATTERN">%5p</Property>
+        <Property name="CONSOLE_LOG_CHARSET">UTF-8</Property>
+        <Property name="FILE_LOG_CHARSET">UTF-8</Property>
+        <Property name="LOG_DATEFORMAT_PATTERN">yyyy-MM-dd HH:mm:ss</Property>
+        <Property name="CONSOLE_LOG_PATTERN">%-8relative - %d{${sys:LOG_DATEFORMAT_PATTERN:-yyyyMMdd HHmmssSSS}} %-20X{userId} ${sys:LOG_LEVEL_PATTERN:-%-5p} [PID:%pid] - [%-15.15t] %c%L: %m{nolookups}%n${sys:LOG_EXCEPTION_CONVERSION_WORD:-%wEx}</Property>
+        <Property name="FILE_LOG_PATTERN">%-8relative - %d{${sys:LOG_DATEFORMAT_PATTERN:-yyyyMMdd HHmmssSSS}} %-20X{userId} ${sys:LOG_LEVEL_PATTERN:-%-5p} [PID:%pid] - [%-15.15t] %c%L: %m{nolookups}%n${sys:LOG_EXCEPTION_CONVERSION_WORD:-%wEx}</Property>
+        <Property name="LOG_FILE">${sys:LOG_FILE:-api-gateway}</Property>
+        <Property name="LOG_PATH">${sys:LOG_PATH:-logs}</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT" follow="true">
+            <PatternLayout pattern="${CONSOLE_LOG_PATTERN}" charset="${CONSOLE_LOG_CHARSET}" disableAnsi="false" noConsoleNoAnsi="false" />
+        </Console>
+
+        <RollingRandomAccessFile
+            name="InfoLog"
+            fileName="${LOG_PATH}/${LOG_FILE}-info.log"
+            filePattern="${LOG_PATH}/$${date:yyyy-MM}/${LOG_FILE}-info-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="${FILE_LOG_PATTERN}" charset="${FILE_LOG_CHARSET}" />
+            <Filters>
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <Policies>
+                <OnStartupTriggeringPolicy />
+                <TimeBasedTriggeringPolicy interval="3" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingRandomAccessFile>
+
+        <RollingRandomAccessFile
+                name="WarnLog"
+                fileName="${LOG_PATH}/${LOG_FILE}-warn.log"
+                filePattern="${LOG_PATH}/$${date:yyyy-MM}/${LOG_FILE}-warn-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="${FILE_LOG_PATTERN}" charset="${FILE_LOG_CHARSET}" />
+            <Filters>
+                <LevelRangeFilter minLevel="WARN" maxLevel="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <Policies>
+                <OnStartupTriggeringPolicy />
+                <TimeBasedTriggeringPolicy interval="3" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingRandomAccessFile>
+
+        <RollingRandomAccessFile
+                name="ErrorLog"
+                fileName="${LOG_PATH}/${LOG_FILE}-error.log"
+                filePattern="${LOG_PATH}/$${date:yyyy-MM}/${LOG_FILE}-error-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="${FILE_LOG_PATTERN}" charset="${FILE_LOG_CHARSET}" />
+            <Filters>
+                <LevelRangeFilter minLevel="ERROR" maxLevel="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <Policies>
+                <OnStartupTriggeringPolicy />
+                <TimeBasedTriggeringPolicy interval="3" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingRandomAccessFile>
+
+    <Async name="Async" includeLocation="false">
+        <AppenderRef ref="Console" />
+        <AppenderRef ref="InfoLog" />
+        <AppenderRef ref="WarnLog" />
+        <AppenderRef ref="ErrorLog" />
+    </Async>
+    </Appenders>
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="Async" />
+        </Root>
+    </Loggers>
+</Configuration>
