@@ -1,5 +1,7 @@
 package com.dongpv.sns.gateway.configuration;
 
+import static com.dongpv.sns.gateway.constant.CommonConstant.*;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -16,7 +18,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ServerWebExchange;
 
-import com.dongpv.sns.gateway.dto.ApiResponse;
+import com.dongpv.sns.gateway.code.ErrorCode;
+import com.dongpv.sns.gateway.dto.MultiRecordErrorResponseDtoBase;
+import com.dongpv.sns.gateway.exception.JsonSerializationException;
 import com.dongpv.sns.gateway.service.IdentityService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,8 +40,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     IdentityService identityService;
     ObjectMapper objectMapper;
 
-    @NonFinal
-    private String[] publicEndpoints = {
+    private static final String[] PUBLIC_ENDPOINTS = {
         "/identity/auth/.*", "/identity/users/registration", "/notification/email/send", "/file/media/download/.*"
     };
 
@@ -55,7 +58,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
         List<String> authHeader = exchange.getRequest().getHeaders().get(HttpHeaders.AUTHORIZATION);
         if (CollectionUtils.isEmpty(authHeader)) return unauthenticated(exchange.getResponse());
 
-        String token = authHeader.getFirst().replace("Bearer ", "");
+        String token = authHeader.getFirst().replace(BEARER, EMPTY);
         LOGGER.info("Token: {}", token);
 
         return identityService
@@ -73,19 +76,20 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     }
 
     private boolean isPublicEndpoint(ServerHttpRequest request) {
-        return Arrays.stream(publicEndpoints)
+        return Arrays.stream(PUBLIC_ENDPOINTS)
                 .anyMatch(s -> request.getURI().getPath().matches(apiPrefix + s));
     }
 
     Mono<Void> unauthenticated(ServerHttpResponse response) {
-        ApiResponse<?> apiResponse =
-                ApiResponse.builder().code(1401).message("Unauthenticated").build();
-
-        String body = null;
+        MultiRecordErrorResponseDtoBase apiResponse = new MultiRecordErrorResponseDtoBase(
+                ErrorCode.UNAUTHENTICATED.getCode(), HttpStatus.UNAUTHORIZED.getReasonPhrase());
+        apiResponse.addDetail(KEY_EXCEPTION, ErrorCode.UNAUTHENTICATED.getMessage());
+        String body;
         try {
             body = objectMapper.writeValueAsString(apiResponse);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new JsonSerializationException(
+                    "Failed to serialize api response", ErrorCode.INTERNAL_SERVER_ERROR, e);
         }
 
         response.setStatusCode(HttpStatus.UNAUTHORIZED);

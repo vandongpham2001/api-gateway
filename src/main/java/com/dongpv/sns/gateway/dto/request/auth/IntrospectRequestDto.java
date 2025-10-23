@@ -1,4 +1,4 @@
-package com.dongpv.sns.gateway.dto.request;
+package com.dongpv.sns.gateway.dto.request.auth;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
