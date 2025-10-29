@@ -39,4 +39,5 @@ out/
 logs
 
 **/src/**/application.yaml
+**/src/**/application-dev.yaml
 **/src/**/application-prod.yaml
