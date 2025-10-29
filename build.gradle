@@ -45,6 +45,10 @@ dependencies {
     testRuntimeOnly "org.apache.logging.log4j:log4j-slf4j-impl"
 
     compileOnly "com.sun.xml.bind:jaxb-osgi:${jaxbOsgiVersion}"
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+    implementation 'org.glassfish.jaxb:jaxb-runtime'
+    implementation 'jakarta.xml.bind:jakarta.xml.bind-api'
 }
 
 dependencyManagement {
