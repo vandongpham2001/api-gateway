@@ -1,3 +1,6 @@
+server:
+  port: 8888
+
 spring:
   application:
     name: api-gateway
@@ -53,9 +56,19 @@ logging:
 web:
   url:
 
-server:
-  port: 8888
-
 app:
   api-prefix: /api/v1
   gateway-token:
+  services:
+    identity-service:
+      url: http://localhost:8080
+    profile-service:
+      url: http://localhost:8081
+    notification-service:
+      url: http://localhost:8082
+    post-service:
+      url: http://localhost:8083
+    file-service:
+      url: http://localhost:8084
+    chat-service:
+      url: http://localhost:8085
