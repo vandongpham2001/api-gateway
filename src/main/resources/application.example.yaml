@@ -1,5 +1,5 @@
 server:
-  port: 8888
+  port: ${API_GATEWAY_PORT}
 
 spring:
   application:
@@ -10,65 +10,78 @@ spring:
         webflux:
           routes:
             - id: identity_service
-              uri: http://localhost:8080
+              uri: ${app.services.identity.url}
               predicates:
                 - Path=${app.api-prefix}/identity/**
               filters:
                 - StripPrefix=2
                 - AddRequestHeader=X-Gateway-Token, ${app.gateway-token}
             - id: profile_service
-              uri: http://localhost:8081
+              uri: ${app.services.profile.url}
               predicates:
-                - Path=${app.api-prefix}/profile/users/**
+                - Path=${app.api-prefix}/profile/**
               filters:
                 - StripPrefix=2
             - id: notification_service
-              uri: http://localhost:8082
+              uri: ${app.services.notification.url}
               predicates:
                 - Path=${app.api-prefix}/notification/**
               filters:
                 - StripPrefix=2
             - id: post_service
-              uri: http://localhost:8083
+              uri: ${app.services.post.url}
               predicates:
                 - Path=${app.api-prefix}/post/**
               filters:
                 - StripPrefix=2
             - id: file_service
-              uri: http://localhost:8084
+              uri: ${app.services.file.url}
               predicates:
                 - Path=${app.api-prefix}/file/**
               filters:
                 - StripPrefix=2
             - id: chat_service
-              uri: http://localhost:8085
+              uri: ${app.services.chat.url}
               predicates:
                 - Path=${app.api-prefix}/chat/**
               filters:
                 - StripPrefix=2
+            - id: search_service
+              uri: ${app.services.search.url}
+              predicates:
+                - Path=${app.api-prefix}/search/**
+              filters:
+                - StripPrefix=2
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: true
 
 logging:
   level:
-    com.zaxxer.hikari:
-    org.hibernate.engine.jdbc.connections.internal:
-    org.hibernate.orm.connections.pooling:
+    com.zaxxer.hikari: off
+    org.hibernate.engine.jdbc.connections.internal: off
+    org.hibernate.orm.connections.pooling: WARN
 
 web:
-  url:
+  url: ${WEB_URL}
 
 app:
-  api-prefix: /api/v1
-  gateway-token:
+  api-prefix: ${API_GATEWAY_PREFIX}
+  gateway-token: ${API_GATEWAY_TOKEN}
   services:
-    identity-service:
-      url: http://localhost:8080
-    profile-service:
-      url: http://localhost:8081
-    notification-service:
-      url: http://localhost:8082
-    post-service:
-      url: http://localhost:8083
-    file-service:
-      url: http://localhost:8084
-    chat-service:
-      url: http://localhost:8085
+    identity:
+      url: ${IDENTITY_SERVICE_HOST}
+    profile:
+      url: ${PROFILE_SERVICE_HOST}
+    notification:
+      url: ${NOTIFICATION_SERVICE_HOST}
+    post:
+      url: ${POST_SERVICE_HOST}
+    file:
+      url: ${FILE_SERVICE_HOST}
+    chat:
+      url: ${CHAT_SERVICE_HOST}
+    search:
+      url: ${SEARCH_SERVICE_HOST}

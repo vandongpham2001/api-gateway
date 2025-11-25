@@ -19,7 +19,7 @@ import com.dongpv.sns.gateway.repository.IdentityClient;
 @Configuration
 public class WebClientConfiguration {
 
-    @Value("${app.services.identity-service.url}")
+    @Value("${app.services.identity.url}")
     private String identityBaseUrl;
 
     @Bean
