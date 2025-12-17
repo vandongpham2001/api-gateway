@@ -6,7 +6,6 @@ import jakarta.xml.bind.UnmarshalException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartException;
 
 import com.dongpv.sns.gateway.code.ErrorCode;
@@ -58,24 +56,25 @@ public class CommonExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public final ResponseEntity<Object> handleAllExceptions(Exception ex, WebRequest request) {
+    public final ResponseEntity<Object> handleAllExceptions(Exception ex) {
+        LOGGER.error("Unhandled exception occurred", ex);
         return getResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, ex.getLocalizedMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Object> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-        final MultiRecordErrorResponseDtoBase response = new MultiRecordErrorResponseDtoBase(
-                status.value(), HttpStatus.valueOf(status.value()).getReasonPhrase());
+    public ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        final MultiRecordErrorResponseDtoBase response =
+                new MultiRecordErrorResponseDtoBase(status.value(), status.getReasonPhrase());
         setFieldErrors(ex.getBindingResult(), response);
 
-        return new ResponseEntity<>(response, headers, status);
+        return new ResponseEntity<>(response, new HttpHeaders(), status);
     }
 
     @ExceptionHandler(TypeMismatchException.class)
-    public ResponseEntity<Object> handleTypeMismatch(
-            TypeMismatchException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-        return getResponseEntity(HttpStatus.valueOf(status.value()), ex.getLocalizedMessage(), headers);
+    public ResponseEntity<Object> handleTypeMismatch(TypeMismatchException ex) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        return getResponseEntity(status, ex.getLocalizedMessage(), new HttpHeaders());
     }
 
     private final ResponseEntity<Object> getResponseEntity(HttpStatus status, String message) {
